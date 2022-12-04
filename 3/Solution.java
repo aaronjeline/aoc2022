@@ -13,13 +13,16 @@ public class Solution {
 
 	public static void main(String[] args) {
 		BufferedReader reader;
-		List<Rucksack> rucksacks = new ArrayList<>();
+		List<Group> groups = new ArrayList<>();
 
 		try {
 			reader = new BufferedReader(new FileReader(filename));
 			String line = reader.readLine();
 			while (line != null) {
-				rucksacks.add(new Rucksack(line));
+				var a = new Rucksack(line);
+				var b = new Rucksack(reader.readLine());
+				var c = new Rucksack(reader.readLine());
+				groups.add(new Group(a,b,c));
 				line = reader.readLine();
 			}
 			reader.close();
@@ -27,44 +30,52 @@ public class Solution {
 			e.printStackTrace();
 		}
 
-		var r = rucksacks
+		var r =  groups
 			.stream()
-			.map(rucksack -> rucksack.overlapPriority())
+			.map(group -> group.badge().priority())
 			.reduce(0, Integer::sum);
 
-		System.out.println("Answer: " + r);
-
+		System.out.println(r);
 
 	}
 }
 
-class Rucksack {
-	final Set<Item> first;
-	final Set<Item> second;
+class Group {
 
-	public Rucksack(String contents) {
+	Rucksack a;
+	Rucksack b;
+	Rucksack c;
 
-		this.first = new HashSet<>();
-		this.second = new HashSet<>();
-
-		var split = contents.length() / 2;
-
-		for (char c : contents.substring(0, split).toCharArray()) {
-			first.add(new Item(c));
-		}
-		for (char c : contents.substring(split, contents.length()).toCharArray()) {
-			second.add(new Item(c));
-		}
-
+	public Group(Rucksack a,Rucksack b,Rucksack c) {
+		this.a = a;
+		this.b = b;
+		this.c = c;
 	}
 
-	public int overlapPriority() {
-		Set<Item> intersect = new HashSet<>(first);
-		intersect.retainAll(second);
+	public Item badge() {
+		var intersect = a.contents();
+		intersect.retainAll(b.contents());
+		intersect.retainAll(c.contents());
 		Object[] objs = intersect.toArray();
-		var duplicate = (Item) objs[0];
-		return duplicate.priority();
+		return (Item) objs[0];
 	}
+
+}
+
+class Rucksack {
+	final Set<Item> contents;
+
+	public Rucksack(String src) {
+		contents = new HashSet<>();
+		for (char c : src.toCharArray()) {
+			contents.add(new Item(c));
+		}
+	}
+
+	public Set<Item> contents() {
+		return contents;
+	}
+
 
 }
 
